@@ -25,9 +25,9 @@ bank.info() # bank: Saderat, accounts, transactions number
 
 
 class Bank:
-    def __init__(self,name):
+    def __init__(self,name,transaction_history):
         self.name = name
-        
+        self.transaction_history = transaction_history
     
     def transaction():
         
