@@ -1,69 +1,100 @@
+import random
+import json
 
 class Bank:
-    def __init__(self,name):
-        self.name=name
-        self.accounts={}
-        
-        self.transaction_history=[]
+    def __init__(self, name):
+        self.name = name
+        self.accounts = {}
+        self.customers = {}
+        self.transactions = []
 
-    def transaction(self,sender, receiver , money):
+    def signup(self, name, age):
+        account_number = str(random.randint(1000, 9999))
 
-        if sender=="0000":
-            self.accounts[receiver]=money
+        while account_number in self.accounts:
+            account_number = str(random.randint(1000, 9999))
 
-            result=[sender,receiver,money]
-            self.transaction_history.append(result)
-            return True
+        self.accounts[account_number] = 0
 
-        if sender in self.accounts:
+        self.customers[account_number] = {
+            "name": name,
+            "age": age
+        }
 
+        return account_number
+
+    def transaction(self, sender, receiver, money):
+        if money <=0:
+            return False
+
+        if sender == "0000":
             if receiver not in self.accounts:
-                self.accounts[receiver]=0
-            if self.accounts[sender]>=money:
-                self.accounts[sender]-=money
-                self.accounts[receiver]+=money
-                result=[sender,receiver,money]
-                self.transaction_history.append(result)
-                return True
-
-            else:
-                result=[sender,receiver,money]
-                self.transaction_history.append(result)
-
                 return False
 
-        return False
+            else:
+                self.accounts[receiver] += money
+                self.transactions.append([sender, receiver, money])
+            return True
 
+        if sender not in self.accounts:
+            return False
 
-    def history(self,account_number):
+        if receiver not in self.accounts:
+            return False
 
-        tr_l=[]
+        if self.accounts[sender] < money:
+            return False
 
-        for transaction in self.transaction_history:
+        self.accounts[sender] -= money
+        self.accounts[receiver] += money
 
-            if transaction[0]==account_number or transaction[1]==account_number:
-                tr_l.append(transaction)
+        self.transactions.append([sender, receiver, money])
+        return True
 
-        return tr_l
+    def transaction_history(self):
+        return self.transactions
 
+    def history(self, account_number):
+        result = []
 
-    def check(self,account_number):
+        for transaction in self.transactions:
+            if transaction[0] == account_number or transaction[1] == account_number:
+                result.append(transaction)
 
-        if account_number=="0000":
-            return -1
+        return result
+    
+    
+# in methode tekrari hast va daghighan kare check ro anjam mideh chon to testa bood neveshtamesh
 
-        else:
-            return self.accounts[account_number]
-
+    def balance_of(self, account_number):
+        return self.accounts[account_number]
 
     def info(self):
-
-        return (self.name,len(self.accounts),len(self.transaction_history))
-
+        return (self.name, len(self.accounts), len(self.transactions))
 
 
-#bahtare ke dige kolan az print estefadeh nakonim va az return estefadeh konime
-        
-#history:تراکنش هاي يک حساب اينکه از کجا به کجا چند ريخته شده
-#info: اظلاعات مربوط به بانک رو نشون بده اينکه چه بانکيه و چه تراکنش هايي داخلش انجام شده
-#check : موجودي حساب
+    def save(self):
+        data = {
+            "name": self.name,
+                "accounts": self.accounts,
+            "customers": self.customers,
+            "transactions": self.transactions
+        }
+
+        file = open("bank.json", "w")
+        json.dump(data, file)
+        file.close()
+
+    def load(self, name=None):
+        file = open("bank.json", "r")
+        data = json.load(file)
+        file.close()
+
+        if name is None:
+            self.name = data["name"]
+        else:
+            self.name = name
+
+        self.accounts = data["accounts"]
+        self.customers = data["customers"]
+        self.transactions = data["transactions"]

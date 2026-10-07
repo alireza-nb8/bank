@@ -1,21 +1,40 @@
 from bank import Bank
-
 bank = Bank('Saderat')
 
-assert bank.transaction('0000', '3321', 48) == True
-assert bank.transaction('3321', '1123', 40) == True
+account_number_ali = bank.signup('Ali', 20)
 
-money_3321 = bank.check('3321')
-assert money_3321 == 8
 
-assert bank.transaction('3321', '1123', 12) == False
+sample_account = '3321'
 
-money_1123 = bank.check('1123')
-assert money_1123 == 40
+if account_number_ali == sample_account:
+    sample_account == '1122'
 
-assert bank.check('0000') == -1
+assert bank.transaction('0000', '3321', 48) == False
 
-assert len(bank.history('3321')) == 3
-assert bank.info() == ("Saderat",  2, 3) # bank_name, number_of_accounts, number_of_transactions
+assert bank.transaction(account_number_ali, '3321', 12) == False # 3321 is not valid
+assert bank.transaction('3321', account_number_ali, 12) == False # 3321 is not valid
+assert len(bank.transaction_history()) == 0
 
+assert bank.transaction('0000', account_number_ali, 40) == True
+
+balance_of_ali_account = bank.balance_of(account_number_ali)
+assert balance_of_ali_account == 40
+
+account_number_hasan = bank.signup('hasan', 25)
+
+
+hasan_balance = bank.balance_of(account_number_hasan)
+assert hasan_balance == 0
+
+assert bank.balance_of('0000') == -1
+
+bank.save()
+
+del bank
+
+bank = Bank()
+bank.load('Saderat')
+
+assert len(bank.transaction_history()) == 1
+assert bank.info() == ('Saderat', 1, 2)
 
